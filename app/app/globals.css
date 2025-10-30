@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+:root {
+  /* Light Mode */
+  --background: 255 255 255;
+  --foreground: 10 10 10;
+  --card: 250 250 250;
+  --card-foreground: 10 10 10;
+  --primary: 0 0 0;
+  --primary-foreground: 255 255 255;
+  --secondary: 245 245 245;
+  --secondary-foreground: 10 10 10;
+  --muted: 245 245 245;
+  --muted-foreground: 115 115 115;
+  --accent: 245 245 245;
+  --accent-foreground: 10 10 10;
+  --border: 229 229 229;
+  --input: 229 229 229;
+  --ring: 10 10 10;
+  --success: 34 197 94;
+  --warning: 251 191 36;
+  --error: 239 68 68;
+}
+
+.dark {
+  /* Dark Mode */
+  --background: 10 10 10;
+  --foreground: 250 250 250;
+  --card: 20 20 20;
+  --card-foreground: 250 250 250;
+  --primary: 255 255 255;
+  --primary-foreground: 10 10 10;
+  --secondary: 30 30 30;
+  --secondary-foreground: 250 250 250;
+  --muted: 30 30 30;
+  --muted-foreground: 161 161 161;
+  --accent: 30 30 30;
+  --accent-foreground: 250 250 250;
+  --border: 38 38 38;
+  --input: 38 38 38;
+  --ring: 250 250 250;
+  --success: 34 197 94;
+  --warning: 251 191 36;
+  --error: 239 68 68;
+}
+
+@theme inline {
+  --color-background: rgb(var(--background));
+  --color-foreground: rgb(var(--foreground));
+  --color-card: rgb(var(--card));
+  --color-card-foreground: rgb(var(--card-foreground));
+  --color-primary: rgb(var(--primary));
+  --color-primary-foreground: rgb(var(--primary-foreground));
+  --color-secondary: rgb(var(--secondary));
+  --color-secondary-foreground: rgb(var(--secondary-foreground));
+  --color-muted: rgb(var(--muted));
+  --color-muted-foreground: rgb(var(--muted-foreground));
+  --color-accent: rgb(var(--accent));
+  --color-accent-foreground: rgb(var(--accent-foreground));
+  --color-border: rgb(var(--border));
+  --color-input: rgb(var(--input));
+  --color-ring: rgb(var(--ring));
+  --color-success: rgb(var(--success));
+  --color-warning: rgb(var(--warning));
+  --color-error: rgb(var(--error));
+}
+
+* {
+  @apply border-border;
+}
+
+body {
+  @apply bg-background text-foreground;
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-secondary;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/30 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/50;
+}

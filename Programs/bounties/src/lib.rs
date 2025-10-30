@@ -330,7 +330,7 @@ pub struct CreateProblem<'info> {
     /// CHECK: computation_account, checked by the arcium program.
     pub computation_account: UncheckedAccount<'info>,
     #[account(
-        address = derive_comp_def_pda!(COMP_DEF_OFFSET_INITIALIZE_MARKET)
+        address = derive_comp_def_pda!(COMP_DEF_OFFSET_INITIALIZE_PROBLEM)
     )]
     pub comp_def_account: Account<'info, ComputationDefinitionAccount>,
     #[account(
