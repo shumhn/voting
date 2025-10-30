@@ -80,7 +80,7 @@ describe("Prediction Market", () => {
     eventName: E,
     timeoutMs = 60000
   ): Promise<Event[E]> => {
-    let listenerId: number;
+    let listenerId: number | undefined;
     let timeoutId: NodeJS.Timeout;
     const event = await new Promise<Event[E]>((res, rej) => {
       listenerId = program.addEventListener(eventName as any, (event) => {
@@ -88,11 +88,15 @@ describe("Prediction Market", () => {
         res(event);
       });
       timeoutId = setTimeout(() => {
-        program.removeEventListener(listenerId);
+        if (listenerId !== undefined) {
+          program.removeEventListener(listenerId);
+        }
         rej(new Error(`Event ${String(eventName)} timed out after ${timeoutMs}ms`));
       }, timeoutMs);
     });
-    await program.removeEventListener(listenerId);
+    if (listenerId !== undefined) {
+      await program.removeEventListener(listenerId);
+    }
     return event;
   };
 
