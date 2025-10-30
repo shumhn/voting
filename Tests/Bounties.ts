@@ -203,7 +203,7 @@ describe("Prediction Market", () => {
     console.log(`Market ID: ${marketId}, PDA: ${marketPDA.toBase58()}`);
 
 
-    const marketCreatedEventPromise = awaitEvent("marketCreatedEvent");
+    const problemPostedEventPromise = awaitEvent("problemPostedEvent");
 
     const question = "Will Bitcoin reach $100,000 by end of 2024?";
     const description = "This market resolves to YES if Bitcoin (BTC) trades at or above $100,000 on any major exchange by December 31, 2024.";
@@ -213,7 +213,7 @@ describe("Prediction Market", () => {
     console.log("Creating prediction market...");
 
     const createMarketSig = await program.methods
-      .createMarket(
+      .createProblem(
         computationOffset,
         new anchor.BN(marketId.toString()),
         question,
@@ -236,7 +236,7 @@ describe("Prediction Market", () => {
           program.programId,
           Buffer.from(getCompDefAccOffset("initialize_market")).readUInt32LE()
         ),
-        market: marketPDA,
+        problem: marketPDA,
       })
       .signers([owner])
       .rpc({ commitment: "confirmed" });
@@ -252,15 +252,15 @@ describe("Prediction Market", () => {
     );
     console.log("Initialize market computation finalized. Signature:", finalizeInitSig);
 
-    const marketCreatedEvent = await marketCreatedEventPromise;
-    console.log("Received MarketCreatedEvent:", marketCreatedEvent);
+    const problemPostedEvent = await problemPostedEventPromise;
+    console.log("Received ProblemPostedEvent:", problemPostedEvent);
 
 
-    const marketState = await program.account.predictionMarket.fetch(marketPDA);
-    expect(marketState.marketId.toString()).to.equal(marketId.toString());
-    expect(marketState.creator.toBase58()).to.equal(owner.publicKey.toBase58());
-    expect(marketState.question).to.equal(question);
-    expect(marketState.state).to.deep.equal({ active: {} });
+    const problemAccount = await program.account.problem.fetch(marketPDA);
+    expect(problemAccount.problemId.toString()).to.equal(marketId.toString());
+    expect(problemAccount.creator.toBase58()).to.equal(owner.publicKey.toBase58());
+    expect(problemAccount.title).to.equal(question);
+    expect(problemAccount.state).to.deep.equal({ active: {} });
 
     console.log("Market created successfully!");
   });
@@ -278,7 +278,7 @@ describe("Prediction Market", () => {
 
 
     try {
-      await program.account.predictionMarket.fetch(marketPDA);
+      await program.account.problem.fetch(marketPDA);
     } catch (e) {
 
       await createTestMarket(marketId);
@@ -286,10 +286,10 @@ describe("Prediction Market", () => {
 
 
     await new Promise(resolve => setTimeout(resolve, 1000));
-    const currentMarketState = await program.account.predictionMarket.fetch(marketPDA);
+    const currentMarketState = await program.account.problem.fetch(marketPDA);
     console.log("Market state before betting:", {
       state: currentMarketState.state,
-      resolutionDeadline: currentMarketState.resolutionDeadline.toString(),
+      deadline: currentMarketState.deadline.toString(),
       currentTime: Math.floor(Date.now() / 1000).toString()
     });
 
@@ -328,10 +328,10 @@ describe("Prediction Market", () => {
       program.programId
     )[0];
 
-    const betPlacedEventPromise = awaitEvent("betPlacedEvent");
+    const solutionSubmittedEventPromise = awaitEvent("solutionSubmittedEvent");
 
     const placeBetSig = await program.methods
-      .placeBet(
+      .submitSolution(
         user1ComputationOffset,
         new anchor.BN(marketId.toString()),
         new anchor.BN(user1BetAmount),
@@ -340,7 +340,7 @@ describe("Prediction Market", () => {
         new anchor.BN(deserializeLE(user1Nonce).toString())
       )
       .accountsPartial({
-        bettor: user1.publicKey,
+        solver: user1.publicKey,
         computationAccount: getComputationAccAddress(
           program.programId,
           user1ComputationOffset
@@ -353,8 +353,8 @@ describe("Prediction Market", () => {
           program.programId,
           Buffer.from(getCompDefAccOffset("place_bet")).readUInt32LE()
         ),
-        market: marketPDA,
-        bet: user1BetPDA,
+        problem: marketPDA,
+        solution: user1BetPDA,
       })
       .signers([user1])
       .rpc({ commitment: "confirmed" });
@@ -370,19 +370,19 @@ describe("Prediction Market", () => {
     );
     console.log("Place bet computation finalized. Signature:", finalizeBetSig);
 
-    const betPlacedEvent = await betPlacedEventPromise;
-    console.log("Received BetPlacedEvent:", betPlacedEvent);
+    const solutionSubmittedEvent = await solutionSubmittedEventPromise;
+    console.log("Received SolutionSubmittedEvent:", solutionSubmittedEvent);
 
 
-    const betState = await program.account.bet.fetch(user1BetPDA);
-    expect(betState.marketId.toString()).to.equal(marketId.toString());
-    expect(betState.bettor.toBase58()).to.equal(user1.publicKey.toBase58());
-    expect(betState.amount.toNumber()).to.equal(user1BetAmount);
-    expect(betState.resolved).to.be.false;
+    const solutionAccount = await program.account.solution.fetch(user1BetPDA);
+    expect(solutionAccount.problemId.toString()).to.equal(marketId.toString());
+    expect(solutionAccount.solver.toBase58()).to.equal(user1.publicKey.toBase58());
+    expect(solutionAccount.amount.toNumber()).to.equal(user1BetAmount);
+    expect(solutionAccount.paid).to.be.false;
 
 
-    const marketState = await program.account.predictionMarket.fetch(marketPDA);
-    expect(marketState.totalBets.toNumber()).to.equal(user1BetAmount);
+    const problemAccount = await program.account.problem.fetch(marketPDA);
+    expect(problemAccount.totalSolutions.toNumber()).to.equal(user1BetAmount);
 
     console.log("Bet placed successfully!");
   });
@@ -407,29 +407,29 @@ describe("Prediction Market", () => {
     console.log("Resolving market...");
 
     const outcome = true;
-    const marketResolvedEventPromise = awaitEvent("marketResolvedEvent");
+    const problemClosedEventPromise = awaitEvent("problemClosedEvent");
 
     const resolveMarketSig = await program.methods
-      .resolveMarket(
+      .closeProblem(
         new anchor.BN(marketId.toString()),
-        outcome
+        owner.publicKey  // winner address instead of boolean outcome
       )
       .accountsPartial({
         authority: owner.publicKey,
-        market: marketPDA,
+        problem: marketPDA,
       })
       .signers([owner])
       .rpc({ commitment: "confirmed" });
 
     console.log("Resolve market TX Signature:", resolveMarketSig);
 
-    const marketResolvedEvent = await marketResolvedEventPromise;
-    console.log("Received MarketResolvedEvent:", marketResolvedEvent);
+    const problemClosedEvent = await problemClosedEventPromise;
+    console.log("Received ProblemClosedEvent:", problemClosedEvent);
 
 
-    const marketState = await program.account.predictionMarket.fetch(marketPDA);
-    expect(marketState.state).to.deep.equal({ resolved: {} });
-    expect(marketState.resolutionResult).to.equal(outcome);
+    const problemAccount = await program.account.problem.fetch(marketPDA);
+    expect(problemAccount.state).to.deep.equal({ resolved: {} });
+    expect(problemAccount.winner).to.not.be.null;
 
     console.log("Market resolved successfully!");
   });
@@ -459,7 +459,7 @@ describe("Prediction Market", () => {
     const minStakeAmount = 1000;
 
     await program.methods
-      .createMarket(
+      .createProblem(
         computationOffset,
         new anchor.BN(marketId.toString()),
         question,
@@ -482,7 +482,7 @@ describe("Prediction Market", () => {
           program.programId,
           Buffer.from(getCompDefAccOffset("initialize_market")).readUInt32LE()
         ),
-        market: marketPDA,
+        problem: marketPDA,
       })
       .signers([owner])
       .rpc({ commitment: "confirmed" });
@@ -525,7 +525,7 @@ describe("Prediction Market", () => {
 
     try {
       const sig = await program.methods
-        .initInitializeMarketCompDef()
+        .initInitializeProblemCompDef()
         .accounts({
           compDefAccount: compDefPDA,
           payer: owner.publicKey,
@@ -597,7 +597,7 @@ describe("Prediction Market", () => {
 
     try {
       const sig = await program.methods
-        .initPlaceBetCompDef()
+        .initSubmitSolutionCompDef()
         .accounts({
           compDefAccount: compDefPDA,
           payer: owner.publicKey,
@@ -660,7 +660,7 @@ describe("Prediction Market", () => {
 
     try {
       const sig = await program.methods
-        .initDistributeRewardsCompDef()
+        .initPayWinnerCompDef()
         .accounts({
           compDefAccount: compDefPDA,
           payer: owner.publicKey,
