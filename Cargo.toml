@@ -1,0 +1,24 @@
+[workspace]
+members = ["Programs/*", "Arcium/circuits/EncryptedIxs"]
+resolver = "2"
+
+[workspace.dependencies]
+anchor-lang = "0.31.1"
+
+[patch.crates-io]
+proc-macro2 = { git = 'https://github.com/arcium-hq/proc-macro2.git' }
+
+[workspace.lints.rust]
+# Suppress warnings about unexpected cfg conditions from Solana/Anchor macros
+unexpected_cfgs = "allow"
+# Suppress deprecation warnings from anchor_lang macros (using deprecated realloc internally)
+deprecated = "allow"
+
+[profile.release]
+overflow-checks = true
+lto = "fat"
+codegen-units = 1
+[profile.release.build-override]
+opt-level = 3
+incremental = false
+codegen-units = 1
