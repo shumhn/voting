@@ -1,5 +1,5 @@
 /**
- * Olivia: Decentralised Permissionless Predicition Market 
+ * Bounty Problem Solver: Decentralised Bounty Platform
  * Copyright (c) 2025 Ayush Srivastava
  *
  * Licensed under the Apache 2.0
@@ -8,7 +8,7 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { PublicKey, Keypair } from "@solana/web3.js";
-import { PredictionMarket } from "../target/types/prediction_market";
+import { BountySolver } from "../target/types/bounty_solver";
 import { randomBytes } from "crypto";
 import {
   awaitComputationFinalization,
@@ -56,7 +56,7 @@ describe("Prediction Market", () => {
   anchor.setProvider(provider);
 
 
-  const program = new anchor.Program<PredictionMarket>(IDL as anchor.Idl, provider);
+  const program = new anchor.Program<BountySolver>(IDL as anchor.Idl, provider);
 
 
   let clusterAccount: PublicKey;
@@ -497,7 +497,7 @@ describe("Prediction Market", () => {
 
 
   async function initInitializeMarketCompDef(
-    program: Program<PredictionMarket>,
+    program: Program<BountySolver>,
     owner: Keypair,
     uploadRawCircuit: boolean
   ): Promise<string> {
@@ -570,7 +570,7 @@ describe("Prediction Market", () => {
   }
 
   async function initPlaceBetCompDef(
-    program: Program<PredictionMarket>,
+    program: Program<BountySolver>,
     owner: Keypair,
     uploadRawCircuit: boolean
   ): Promise<string> {
@@ -633,7 +633,7 @@ describe("Prediction Market", () => {
   }
 
   async function initDistributeRewardsCompDef(
-    program: Program<PredictionMarket>,
+    program: Program<BountySolver>,
     owner: Keypair,
     uploadRawCircuit: boolean
   ): Promise<string> {
