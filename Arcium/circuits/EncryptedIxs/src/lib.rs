@@ -1,5 +1,5 @@
 /*
- * Olivia: Decentralised Permissionless Predicition Market 
+ * Bounty Problem Solver: Decentralised Bounty Platform
  * Copyright (c) 2025 Ayush Srivastava
  *
  * Licensed under the Apache 2.0
@@ -16,8 +16,8 @@ mod circuits {
         no_votes: u8,
     }
 
-    pub struct BetPrediction {
-        prediction: bool,
+    pub struct SolutionData {
+        is_valid: bool,
         amount: u64,
     }
 
@@ -31,7 +31,7 @@ mod circuits {
         no_votes: u8,
     }
 
-    pub struct BetPayout {
+    pub struct WinnerPayout {
         payout_amount: u64,
         won: bool,
     }
@@ -42,7 +42,7 @@ mod circuits {
     }
 
     #[instruction]
-    pub fn initialize_market(mxe: Mxe) -> Enc<Mxe, VoteStats> {
+    pub fn initialize_problem(mxe: Mxe) -> Enc<Mxe, VoteStats> {
         let vote_stats = VoteStats {
             yes_votes: 0,
             no_votes: 0,
@@ -51,7 +51,7 @@ mod circuits {
     }
 
     #[instruction]
-    pub fn place_bet(prediction_ctxt: Enc<Shared, bool>, amount: u64) -> PoolUpdate {
+    pub fn submit_solution(prediction_ctxt: Enc<Shared, bool>, amount: u64) -> PoolUpdate {
         let prediction = prediction_ctxt.to_arcis();
 
         let yes_delta = if prediction { amount } else { 0 };
@@ -99,13 +99,13 @@ mod circuits {
     }
 
     #[instruction]
-    pub fn distribute_rewards(
+    pub fn pay_winner(
         bet_ctxt: Enc<Shared, bool>,
         market_outcome: bool,
         bet_amount: u64,
         yes_pool: u64,
         no_pool: u64,
-    ) -> BetPayout {
+    ) -> WinnerPayout {
         let user_prediction = bet_ctxt.to_arcis();
 
         let won = user_prediction == market_outcome;
