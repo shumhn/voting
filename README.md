@@ -13,7 +13,7 @@ Arcium's encrypted computation keeps every solution private until the problem cl
 
 Magic Block's Ephemeral Rollups on Solana eliminate fees and latency. Post problems, submit solutions, claim bounties—instantly and for free, with the same snappiness you expect from top web apps.
 
-Solana’s high-performance backbone ties it all together, ensuring speed, security, and decentralization without compromise.
+Solana's high-performance backbone ties it all together, ensuring speed, security, and decentralization without compromise.
 
 The result? A platform where privacy, speed, and openness aren't trade-offs—they're the default. Communities form organically around the problems people need solved, and solutions emerge naturally, unhindered by cost or competitive gamesmanship.
 
